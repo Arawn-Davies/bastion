@@ -1,0 +1,4 @@
+# label        ip            user  pass
+# one BMC per line; copy to bmc.conf (gitignored) and fill in real creds
+DELL-NODE       192.0.2.81     root  CHANGEME
+HP-NODE      192.0.2.245    Administrator  CHANGEME
