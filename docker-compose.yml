@@ -7,7 +7,9 @@ services:
     container_name: bmc-console
     env_file:
       - path: .env
-        required: false   # local dev uses .env; Portainer injects vars itself
+        required: false   # local dev
+      - path: stack.env
+        required: false   # Portainer writes stack env vars here
     volumes:
       # ISOs for virtual media → appear in the console's Image File picker at /isos
       - ./isos:/isos:ro
@@ -28,7 +30,9 @@ services:
     container_name: bmc-web
     env_file:
       - path: .env
-        required: false   # local dev uses .env; Portainer injects vars itself
+        required: false   # local dev
+      - path: stack.env
+        required: false   # Portainer writes stack env vars here
     environment:
       CONSOLE_HOST: console
       VNC_PORT: "5901"
