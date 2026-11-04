@@ -4,6 +4,7 @@ services:
   # over the compose network.
   console:
     build: .
+    pull_policy: build   # rebuild on Portainer redeploy
     container_name: bmc-console
     env_file:
       - path: .env
@@ -27,6 +28,7 @@ services:
   # WebSocket to console:5901. This is the only thing you open in a browser.
   web:
     build: ./web
+    pull_policy: build   # rebuild on Portainer redeploy
     container_name: bmc-web
     env_file:
       - path: .env
