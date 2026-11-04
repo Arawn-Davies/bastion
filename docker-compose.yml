@@ -8,9 +8,14 @@ services:
     container_name: bmc-console
     env_file:
       - path: .env
-        required: false   # local dev
-      - path: stack.env
-        required: false   # Portainer writes stack env vars here
+        required: false   # local dev only
+    # Explicit mapping: Portainer Git stacks only interpolate ${VAR} from the
+    # stack's env vars; they are not passed into containers otherwise.
+    environment:
+      ILO_IP: ${ILO_IP:-}
+      IDRAC_IP: ${IDRAC_IP:-}
+      IDRAC_USER: ${IDRAC_USER:-}
+      IDRAC_PASS: ${IDRAC_PASS:-}
     volumes:
       # ISOs for virtual media → appear in the console's Image File picker at /isos
       - ./isos:/isos:ro
@@ -32,12 +37,25 @@ services:
     container_name: bmc-web
     env_file:
       - path: .env
-        required: false   # local dev
-      - path: stack.env
-        required: false   # Portainer writes stack env vars here
+        required: false   # local dev only
     environment:
       CONSOLE_HOST: console
       VNC_PORT: "5901"
+      ILO_IP: ${ILO_IP:-}
+      ILO_USER: ${ILO_USER:-}
+      ILO_PASS: ${ILO_PASS:-}
+      IDRAC_IP: ${IDRAC_IP:-}
+      IDRAC_USER: ${IDRAC_USER:-}
+      IDRAC_PASS: ${IDRAC_PASS:-}
+      FAN_MAX_ILO: ${FAN_MAX_ILO:-18000}
+      FAN_MAX_IDRAC: ${FAN_MAX_IDRAC:-12000}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      PLATFORM_USER: ${PLATFORM_USER:-}
+      PLATFORM_PASS: ${PLATFORM_PASS:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GITHUB_ALLOWED_USERS: ${GITHUB_ALLOWED_USERS:-}
+      TRUST_PROXY: ${TRUST_PROXY:-}
     volumes:
       # persists the CRUD server list (seeded from .env on first run)
       - servers-data:/data
