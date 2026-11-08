@@ -49,6 +49,7 @@ services:
       IDRAC_PASS: ${IDRAC_PASS:-}
       FAN_MAX_ILO: ${FAN_MAX_ILO:-18000}
       FAN_MAX_IDRAC: ${FAN_MAX_IDRAC:-12000}
+      IPMI_CIPHER_SUITE: ${IPMI_CIPHER_SUITE-3}   # unset -> 3; set empty for auto-discovery
       SESSION_SECRET: ${SESSION_SECRET:-}
       PLATFORM_USER: ${PLATFORM_USER:-}
       PLATFORM_PASS: ${PLATFORM_PASS:-}

@@ -94,9 +94,7 @@ SSH_CONSOLE = {
   'dell' => ['/admin1->', 'console -h com2'],
 }.freeze
 
-def sol_cmd(n, *args)
-  ['ipmitool', '-I', 'lanplus', '-H', n[:ip], '-U', n[:user], '-P', n[:pass], *args]
-end
+def sol_cmd(n, *args) = [*ipmi_base(n), *args]
 
 def console_cmd(n, via)
   if via == 'ssh'

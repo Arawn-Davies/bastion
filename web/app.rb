@@ -90,10 +90,20 @@ module Store
 end
 
 # --- IPMI (no shell: array exec, so a '!' in a password is safe) -------------
+# Fixed cipher suite instead of ipmitool's auto-discovery: older BMCs (HP iLO2) don't
+# answer "Get Channel Cipher Suites", so discovery prints that error on every call
+# before falling back. Suite 3 (SHA1 auth/integrity, AES-128) is the IPMI 2.0 suite
+# BMCs universally support; IPMI_CIPHER_SUITE overrides it, empty = auto-discover.
+IPMI_CIPHER_SUITE = ENV.fetch('IPMI_CIPHER_SUITE', '3').to_s.strip
+
+def ipmi_base(n)
+  ['ipmitool', '-I', 'lanplus', '-H', n[:ip], '-U', n[:user], '-P', n[:pass],
+   *(IPMI_CIPHER_SUITE.empty? ? [] : ['-C', IPMI_CIPHER_SUITE])]
+end
+
 def ipmi(n, *args)
   return '' if n[:ip].to_s.empty?
-  cmd = ['ipmitool', '-I', 'lanplus', '-H', n[:ip], '-U', n[:user], '-P', n[:pass],
-         '-N', '2', '-R', '1', *args]
+  cmd = [*ipmi_base(n), '-N', '2', '-R', '1', *args]
   out = ''
   begin
     IO.popen(cmd, err: File::NULL) { |io| out = io.read }

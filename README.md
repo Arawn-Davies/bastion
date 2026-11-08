@@ -136,6 +136,7 @@ the repo builds straight from a `git clone` (see [Deploying with Portainer](#dep
 |---|---|
 | `ILO_IP` / `ILO_USER` / `ILO_PASS` | iLO2 management address and login |
 | `IDRAC_IP` / `IDRAC_USER` / `IDRAC_PASS` | iDRAC6 management address and login |
+| `IPMI_CIPHER_SUITE` | ipmitool `-C` suite for every IPMI call (default `3`; empty = auto-discover, which iLO2 answers with "Unable to Get Channel Cipher Suites") |
 | `PLATFORM_USER` / `PLATFORM_PASS` | local login for the web UI |
 | `GITHUB_CLIENT_ID` / `_SECRET` / `GITHUB_ALLOWED_USERS` | GitHub OAuth login + allow-list |
 | `OIDC_ISSUER` / `OIDC_CLIENT_ID` / `_SECRET` / `OIDC_REDIRECT_URI` | OpenID Connect single sign-on with any IdP (discovery, code flow + PKCE) |

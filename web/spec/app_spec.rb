@@ -264,4 +264,19 @@ RSpec.describe BMC do
       end
     end
   end
+
+  describe 'IPMI command line' do
+    let(:node) { { ip: '192.0.2.10', user: 'u', pass: 'p!w' } }
+
+    it 'pins cipher suite 3 so BMCs without cipher-suite discovery (iLO2) do not error' do
+      expect(ipmi_base(node)).to eq(%w[ipmitool -I lanplus -H 192.0.2.10 -U u -P p!w -C 3])
+    end
+
+    it 'lets IPMI_CIPHER_SUITE override it, or empty for auto-discovery' do
+      stub_const('IPMI_CIPHER_SUITE', '17')
+      expect(ipmi_base(node).last(2)).to eq(%w[-C 17])
+      stub_const('IPMI_CIPHER_SUITE', '')
+      expect(ipmi_base(node)).not_to include('-C')
+    end
+  end
 end
