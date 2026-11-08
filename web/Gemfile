@@ -8,6 +8,7 @@ gem 'eventmachine'           # faye dependency (not used as a reactor here)
 gem 'erubi'                  # HTML-auto-escaping ERB (XSS protection)
 gem 'omniauth', '~> 2.1'
 gem 'omniauth-github'
+gem 'omniauth_openid_connect'  # generic OIDC (any IdP: discovery + PKCE)
 
 group :test do
   gem 'rspec'

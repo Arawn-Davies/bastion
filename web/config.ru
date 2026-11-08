@@ -11,6 +11,7 @@ require 'io/console'
 require 'rack/session'
 require 'omniauth'
 require 'omniauth-github'
+require 'omniauth_openid_connect'
 require './app'
 
 OmniAuth.config.allowed_request_methods = %i[post]
@@ -186,6 +187,22 @@ use Rack::Session::Cookie,
     expire_after: 60 * 60 * 12
 use OmniAuth::Builder do
   provider :github, ENV['GITHUB_CLIENT_ID'], ENV['GITHUB_CLIENT_SECRET'], scope: 'read:user'
+  # Any OpenID Connect IdP, found via discovery (OIDC_ISSUER/.well-known/openid-configuration).
+  # Authorisation code flow with PKCE; the IdP must list OIDC_REDIRECT_URI exactly.
+  unless OIDC_ISSUER.empty?
+    provider :openid_connect,
+             name: :oidc,
+             issuer: OIDC_ISSUER,
+             discovery: true,
+             response_type: :code,
+             pkce: true,
+             scope: %i[openid email profile],
+             client_options: {
+               identifier: ENV['OIDC_CLIENT_ID'],
+               secret: ENV['OIDC_CLIENT_SECRET'],
+               redirect_uri: ENV['OIDC_REDIRECT_URI']
+             }
+  end
 end
 
 map('/websockify') { run ws_proxy }

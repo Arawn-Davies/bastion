@@ -60,6 +60,65 @@ RSpec.describe BMC do
       expect(last_response.status).to eq(403)
     end
 
+    describe 'OpenID Connect' do
+      it 'offers single sign-on on the login page, CSRF-protected' do
+        get '/login'
+        expect(last_response.body).to include('action="/auth/oidc"', 'Sign in with single sign-on', 'authenticity_token')
+      end
+
+      it 'admits a member of an allowed group' do
+        mock_oidc(nickname: 'alice', email: 'alice@example.test', groups: ['BMC Admins'])
+        get '/auth/oidc/callback'
+        expect(last_response.status).to eq(302)
+        get '/'
+        expect(last_response).to be_ok
+      end
+
+      it 'admits an allowed user by email, case-insensitively' do
+        mock_oidc(nickname: 'ops', email: 'OPS@example.test', groups: [])
+        get '/auth/oidc/callback'
+        expect(last_response.status).to eq(302)
+        get '/dashboard'
+        expect(last_response).to be_ok
+      end
+
+      it 'denies a valid IdP user who is in neither allow-list' do
+        mock_oidc(nickname: 'mallory', email: 'mallory@example.test', groups: ['Everyone'])
+        get '/auth/oidc/callback'
+        expect(last_response.status).to eq(403)
+        expect(last_response.body).to include('mallory is not authorised')
+        get '/dashboard'
+        expect(last_response.headers['Location']).to include('/login')
+      end
+
+      it 'is fail-closed when no allow-list is configured' do
+        stub_const('OIDC_ALLOWED_USERS', [])
+        stub_const('OIDC_ALLOWED_GROUPS', [])
+        mock_oidc(nickname: 'alice', email: 'alice@example.test', groups: ['BMC Admins'])
+        get '/auth/oidc/callback'
+        expect(last_response.status).to eq(403)
+      end
+
+      it 'does not trust a group name that only partially matches' do
+        mock_oidc(nickname: 'eve', email: 'eve@example.test', groups: ['BMC Admins (read-only)', 'bmc admins'])
+        get '/auth/oidc/callback'
+        expect(last_response.status).to eq(403)
+      end
+
+      it 'returns 404 for the callback when OIDC is not configured' do
+        stub_const('OIDC_ISSUER', '')
+        get '/auth/oidc/callback'
+        expect(last_response.status).to eq(404)
+      end
+
+      it 'shows the IdP error on failure without echoing markup' do
+        get '/auth/failure', strategy: 'oidc', message: '<script>x</script>'
+        expect(last_response.status).to eq(401)
+        expect(last_response.body).to include('Single sign-on failed')
+        expect(last_response.body).not_to include('<script>x</script>')
+      end
+    end
+
     it 'logs out' do
       login_local!
       get '/logout'

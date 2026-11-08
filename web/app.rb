@@ -11,6 +11,14 @@ STORE_PATH   = ENV['SERVERS_PATH'] || '/data/servers.json'
 GITHUB_ALLOWED = ENV['GITHUB_ALLOWED_USERS'].to_s.split(',').map { |s| s.strip.downcase }.reject(&:empty?)
 PLATFORM_USER  = ENV['PLATFORM_USER'].to_s
 PLATFORM_PASS  = ENV['PLATFORM_PASS'].to_s
+# Generic OpenID Connect (any IdP). Fail-closed: a user is admitted only when their
+# preferred_username/email is in OIDC_ALLOWED_USERS or one of their `groups` claim
+# values is in OIDC_ALLOWED_GROUPS. With neither list set, nobody gets in via OIDC.
+csv = ->(v) { v.to_s.split(',').map(&:strip).reject(&:empty?) }
+OIDC_ISSUER         = ENV['OIDC_ISSUER'].to_s
+OIDC_LABEL          = ENV['OIDC_LABEL'].to_s.empty? ? 'single sign-on' : ENV['OIDC_LABEL']
+OIDC_ALLOWED_USERS  = csv.(ENV['OIDC_ALLOWED_USERS']).map(&:downcase)
+OIDC_ALLOWED_GROUPS = csv.(ENV['OIDC_ALLOWED_GROUPS'])
 
 # --- server store: BMC entries (CRUD), persisted to a JSON volume ------------
 # Seeded on first run from the .env pair, which also own the two wired-up
@@ -170,8 +178,20 @@ class BMC < Sinatra::Base
     def authed?      = !!session['auth']
     def current_user = session['user']
     def github_enabled? = !ENV['GITHUB_CLIENT_ID'].to_s.empty?
+    def oidc_enabled?   = !OIDC_ISSUER.empty?
     def local_enabled?  = !PLATFORM_USER.empty?
-    def auth_enabled?   = github_enabled? || local_enabled?
+    def auth_enabled?   = github_enabled? || oidc_enabled? || local_enabled?
+    def oidc_label      = OIDC_LABEL
+
+    # [display name, admitted?] for an OIDC identity
+    def oidc_identity(auth)
+      info   = auth&.dig('info') || {}
+      raw    = auth&.dig('extra', 'raw_info') || {}
+      names  = [info['nickname'], raw['preferred_username'], info['email']].map { |v| v.to_s.downcase }.reject(&:empty?)
+      groups = Array(raw['groups']).map(&:to_s)
+      ok = names.intersect?(OIDC_ALLOWED_USERS) || groups.intersect?(OIDC_ALLOWED_GROUPS)
+      [info['nickname'].to_s.empty? ? info['email'].to_s : info['nickname'].to_s, ok]
+    end
   end
 
   before do
@@ -213,8 +233,23 @@ class BMC < Sinatra::Base
     end
   end
 
+  get '/auth/oidc/callback' do
+    halt 404 unless oidc_enabled?
+    name, ok = oidc_identity(request.env['omniauth.auth'])
+    if ok
+      session.clear   # fresh session on privilege change (no fixation)
+      session['auth'] = true
+      session['user'] = name
+      redirect '/'
+    else
+      @error = name.empty? ? 'Sign-in failed' : "#{name} is not authorised"
+      status 403
+      erb :login
+    end
+  end
+
   get '/auth/failure' do
-    @error = "GitHub sign-in failed: #{params['message']}"
+    @error = "#{params['strategy'] == 'oidc' ? 'Single sign-on' : 'GitHub sign-in'} failed: #{params['message']}"
     status 401
     erb :login
   end

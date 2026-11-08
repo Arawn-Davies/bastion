@@ -138,13 +138,16 @@ the repo builds straight from a `git clone` (see [Deploying with Portainer](#dep
 | `IDRAC_IP` / `IDRAC_USER` / `IDRAC_PASS` | iDRAC6 management address and login |
 | `PLATFORM_USER` / `PLATFORM_PASS` | local login for the web UI |
 | `GITHUB_CLIENT_ID` / `_SECRET` / `GITHUB_ALLOWED_USERS` | GitHub OAuth login + allow-list |
+| `OIDC_ISSUER` / `OIDC_CLIENT_ID` / `_SECRET` / `OIDC_REDIRECT_URI` | OpenID Connect single sign-on with any IdP (discovery, code flow + PKCE) |
+| `OIDC_ALLOWED_USERS` / `OIDC_ALLOWED_GROUPS` | who may sign in via OIDC (usernames/emails, `groups` claim); empty = nobody |
+| `OIDC_LABEL` | button text, "Sign in with …" (default "single sign-on") |
 | `SESSION_SECRET` | signs the session cookie (`openssl rand -hex 32`) |
 | `TRUST_PROXY` | `1` when behind a TLS reverse proxy (see SECURITY.md) |
 | `WEB_BIND` | host interface for `8088` (default `127.0.0.1`) |
 
 Values are read literally (no quotes). BMC credentials live only server-side and
-never reach the browser. Set a login (`PLATFORM_*` or GitHub) before exposing the
-app: with neither configured it runs open.
+never reach the browser. Set a login (`PLATFORM_*`, GitHub or OIDC) before exposing
+the app: with none configured it runs open.
 
 ## Tests
 
@@ -164,8 +167,8 @@ on the host), so Portainer can build straight from the Git repo:
 2. Repository URL `https://github.com/Arawn-Davies/bastion`, compose path
    `docker-compose.yml`.
 3. **Environment variables:** add your `.env` values (`ILO_*`, `IDRAC_*`,
-   `PLATFORM_USER`/`PLATFORM_PASS`, `SESSION_SECRET`, and the `GITHUB_*` trio if
-   using SSO). Portainer writes these to the stack's env; the compose reads `.env`
+   `PLATFORM_USER`/`PLATFORM_PASS`, `SESSION_SECRET`, and the `GITHUB_*` trio or
+   the `OIDC_*` set if using SSO). Portainer writes these to the stack's env; the compose reads `.env`
    optionally, so nothing breaks if a var is unset.
 4. **GitOps updates:** enable polling (e.g. every 5 min) or add the webhook, so a
    push to `main` re-pulls and rebuilds automatically. This is the auto-redeploy
@@ -224,8 +227,9 @@ The fiddly bits, documented so a rebuild never becomes archaeology:
 Full posture, accepted risks, and hardening steps are in **[SECURITY.md](SECURITY.md)**.
 In brief:
 
-- **Authenticated front door.** Every route is gated by GitHub OAuth (allow-list)
-  and/or a local login (constant-time compare). The console WebSocket is gated too.
+- **Authenticated front door.** Every route is gated by OpenID Connect SSO (any IdP,
+  user/group allow-list, fail-closed), GitHub OAuth (allow-list) and/or a local login
+  (constant-time compare). The console WebSocket is gated too.
 - **BMC credentials are server-side only**, never sent to the browser. They live
   in `.env` and the `servers-data` volume (`servers.json`, plaintext, same trust
   level as `.env`), both outside git and the image.

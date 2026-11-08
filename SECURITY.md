@@ -17,16 +17,23 @@ document describes the posture, the accepted risks, and how to deploy it safely.
 ## The front door (authentication)
 
 Every route except `/login`, `/logout`, and `/auth/*` is gated by a `before`
-filter (`web/app.rb`). Two methods, either or both:
+filter (`web/app.rb`). Three methods, any combination:
 
+- **OpenID Connect** (`omniauth_openid_connect`) with any IdP: discovery from
+  `OIDC_ISSUER`, authorisation code flow with PKCE, the request phase is a
+  CSRF-protected POST like GitHub's. Authorisation is **fail-closed**: a user is
+  admitted only if their `preferred_username` or `email` is in `OIDC_ALLOWED_USERS`,
+  or one of their `groups` claim values exactly matches `OIDC_ALLOWED_GROUPS`. A
+  valid IdP login on neither list is rejected 403, and with both lists empty nobody
+  gets in through OIDC. The session is reset on successful sign-in.
 - **GitHub OAuth** via OmniAuth, restricted to a case-insensitive allow-list
   (`GITHUB_ALLOWED_USERS`). A valid GitHub login not on the list is rejected 403.
 - **Local login** (`PLATFORM_USER` / `PLATFORM_PASS`), compared with
   `Rack::Utils.secure_compare` (constant-time, resists timing attacks).
 
 > **Important:** auth is only enforced when at least one method is configured.
-> If both GitHub and `PLATFORM_USER` are left blank the app runs **open**. Always
-> set local creds or GitHub before exposing it anywhere. This is intentional for
+> If OIDC, GitHub and `PLATFORM_USER` are all left blank the app runs **open**. Always
+> set local creds, OIDC or GitHub before exposing it anywhere. This is intentional for
 > first-boot on a trusted workstation, but it is a foot-gun worth calling out.
 
 Both WebSocket bridges are gated too: `config.ru`'s noVNC proxy (`/websockify`)
@@ -131,6 +138,8 @@ Nginx Proxy Manager (NPM). App-side setup:
    - Let's Encrypt cert + Force SSL + HTTP/2.
    - If using GitHub OAuth, set the OAuth app callback to
      `https://<your-domain>/auth/github/callback`.
+   - If using OIDC, register `https://<your-domain>/auth/oidc/callback` (strict
+     match) with the IdP and set the same value as `OIDC_REDIRECT_URI`.
 4. Harden the proxy itself (its admin UI on a separate port/network, an Access
    List or IP allow-list in front of the app). That is the proxy's job, not this
    app's.
