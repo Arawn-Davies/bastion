@@ -88,7 +88,7 @@ old key-exchange/cipher/host-key algorithms (`diffie-hellman-group1-sha1`,
 does not verify the BMC host key (`StrictHostKeyChecking=no`,
 `UserKnownHostsFile=/dev/null`). This is the same accepted posture as the dead TLS
 the KVM path uses: it applies only to *outbound* connections to BMCs on the
-trusted management VLAN, never to how clients reach Bastion. Keep the BMCs
+trusted management VLAN, never to how clients reach SquidBMC. Keep the BMCs
 isolated (below) so this weak channel is not exposed.
 
 ## Output encoding (XSS)
@@ -158,4 +158,4 @@ CI (`.github/workflows/ci.yml`) runs on every push/PR:
 ## Reporting
 
 This is a personal/self-hosted project. Open an issue at
-`github.com/Arawn-Davies/bastion` for security concerns.
+`github.com/Arawn-Davies/SquidBMC` for security concerns.

@@ -1,4 +1,4 @@
-# Bastion - implementation plan (next up)
+# SquidBMC - implementation plan (next up)
 
 Two features to build next. Written before a WSL2 RAM bump so we can resume
 cleanly. No em-dashes anywhere.
@@ -16,7 +16,7 @@ cleanly. No em-dashes anywhere.
 ## Serial console — host-side enablement (feature shipped; this is the operator recipe)
 
 The in-browser serial console (`/serial/<node>`, SSH `textcons`/`console com2` or
-IPMI SOL) is built and needs nothing more in Bastion. To get more than a blank
+IPMI SOL) is built and needs nothing more in SquidBMC. To get more than a blank
 screen you configure the **server**: firmware serial redirection for POST/BIOS,
 and a serial **getty** for a Linux login shell. On both an HP DL320 G6 and a Dell
 R510 the BMC serial console is **COM2 = ttyS1**, so the Linux side is identical.
@@ -115,7 +115,7 @@ the front door.
   stream being opened unauthenticated.
 
 ### Login page
-- Centered dark Tailwind card, `🛡 Bastion`, big "Sign in with GitHub" button,
+- Centered dark Tailwind card, `🛡 SquidBMC`, big "Sign in with GitHub" button,
   optional local user/pass under a divider. Reuse the look from `layout.erb`.
 
 ### Tests (`web/spec/app_spec.rb`)

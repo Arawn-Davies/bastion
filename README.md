@@ -1,9 +1,9 @@
-# 🛡 Bastion
+# 🛡 SquidBMC
 
 > **A hardened front for legacy iron.**
 > One guarded entrance to lights-out management: **iLO2**, **iDRAC6**, a unified **IPMI dashboard**, and full **KVM consoles**, from any modern browser.
 
-Bastion is a self-hosted control panel for out-of-band management of older
+SquidBMC is a self-hosted control panel for out-of-band management of older
 servers whose native tooling (ActiveX consoles, NPAPI Java applets, dead TLS
 ciphers) modern browsers and operating systems can no longer run. It quarantines
 all of that legacy in a container and gives you one clean, modern web UI.
@@ -30,7 +30,7 @@ Confirmed against **HP ProLiant DL320 G6** (iLO2) and **Dell PowerEdge R510** (i
 ## Architecture
 
 ```
-                          Bastion
+                         SquidBMC
   ┌──────────────────────────────────────────────────────────────┐
   browser ──http:8088──▶  web  (Sinatra + Tailwind)
                           │  · IPMI dashboard + power   (ipmitool)
@@ -76,7 +76,7 @@ Modern machines simply cannot drive these BMCs anymore:
 - The BMCs speak **SSLv3 / TLS 1.0 with RC4 / 3DES**, which modern TLS refuses.
 - Their **self-signed certs** are long expired.
 
-Bastion contains all of that in the engine container so your daily driver
+SquidBMC contains all of that in the engine container so your daily driver
 stays clean and modern.
 
 ## Quickstart
@@ -165,7 +165,7 @@ The image is self-contained (Firefox 52 is fetched in a build stage, not staged
 on the host), so Portainer can build straight from the Git repo:
 
 1. **Stacks → Add stack → Repository.**
-2. Repository URL `https://github.com/Arawn-Davies/bastion`, compose path
+2. Repository URL `https://github.com/Arawn-Davies/SquidBMC`, compose path
    `docker-compose.yml`.
 3. **Environment variables:** add your `.env` values (`ILO_*`, `IDRAC_*`,
    `PLATFORM_USER`/`PLATFORM_PASS`, `SESSION_SECRET`, and the `GITHUB_*` trio or

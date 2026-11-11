@@ -7,14 +7,14 @@ ENV['GITHUB_ALLOWED_USERS'] ||= 'Arawn-Davies'
 ENV['GITHUB_CLIENT_ID']     ||= 'testid'
 ENV['GITHUB_CLIENT_SECRET'] ||= 'testsecret'
 ENV['OIDC_ISSUER']          ||= 'https://idp.example.test/'
-ENV['OIDC_CLIENT_ID']       ||= 'bastion'
+ENV['OIDC_CLIENT_ID']       ||= 'squidbmc'
 ENV['OIDC_CLIENT_SECRET']   ||= 'oidcsecret'
-ENV['OIDC_REDIRECT_URI']    ||= 'https://bastion.example.test/auth/oidc/callback'
+ENV['OIDC_REDIRECT_URI']    ||= 'https://bmc.example.test/auth/oidc/callback'
 ENV['OIDC_ALLOWED_USERS']   ||= 'ops@example.test'
 ENV['OIDC_ALLOWED_GROUPS']  ||= 'BMC Admins'
 
 require 'tmpdir'
-ENV['SERVERS_PATH'] ||= File.join(Dir.tmpdir, 'bastion_servers_test.json')
+ENV['SERVERS_PATH'] ||= File.join(Dir.tmpdir, 'squidbmc_servers_test.json')
 
 require 'rack/test'
 require 'omniauth'
