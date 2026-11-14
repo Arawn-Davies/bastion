@@ -158,4 +158,4 @@ CI (`.github/workflows/ci.yml`) runs on every push/PR:
 ## Reporting
 
 This is a personal/self-hosted project. Open an issue at
-`github.com/Arawn-Davies/SquidBMC` for security concerns.
+`github.com/squidutils/SquidBMC` for security concerns.

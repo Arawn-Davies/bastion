@@ -165,7 +165,7 @@ The image is self-contained (Firefox 52 is fetched in a build stage, not staged
 on the host), so Portainer can build straight from the Git repo:
 
 1. **Stacks → Add stack → Repository.**
-2. Repository URL `https://github.com/Arawn-Davies/SquidBMC`, compose path
+2. Repository URL `https://github.com/squidutils/SquidBMC`, compose path
    `docker-compose.yml`.
 3. **Environment variables:** add your `.env` values (`ILO_*`, `IDRAC_*`,
    `PLATFORM_USER`/`PLATFORM_PASS`, `SESSION_SECRET`, and the `GITHUB_*` trio or
